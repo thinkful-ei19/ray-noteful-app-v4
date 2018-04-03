@@ -1,5 +1,5 @@
 'use strict';
-
+//Decoding Json Web Token(JWT) to check authentication
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 const { JWT_SECRET } = require('../config');
 

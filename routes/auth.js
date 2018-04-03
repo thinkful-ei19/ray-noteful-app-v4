@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 
 const options = {session: false, failWithError: true};
 
+//Checking username and password  
 const localAuth = passport.authenticate('local', options);
 
 const createAuthToken = function (user) {
@@ -23,6 +24,7 @@ router.post('/login', localAuth, (req, res) => {
   res.json({ authToken });
 });
 
+//Using passport library method .authenticate to protect endpoint
 const jwtAuth = passport.authenticate('jwt', { session: false, failWithError: true });
 
 router.post('/refresh', jwtAuth, (req, res) => {
