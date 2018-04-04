@@ -9,38 +9,12 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
-function validateFolderId(userId, folderId) {
-  if (!folderId) {
-    return Promise.resolve();
-  }
-  return Folder.findOne({ _id: folderId, userId })
-    .then(result => {
-      if (!result) {
-        return Promise.reject('InvalidFolder');
-      }
-    });
-}
-
-function validateTagIds(userId, tags = []) {
-  if (!tags.length) {
-    return Promise.resolve();
-  }
-  return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
-    .then(results => {
-      if (tags.length !== results.length) {
-        return Promise.reject('InvalidTag');
-      }
-    });
-}
-
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/notes', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
   const userId = req.user.id;
 
-  let filter = {
-    userId: userId
-  };
+  let filter = { userId };
 
   /**
    * BONUS CHALLENGE - Search both title and content using $OR Operator
@@ -120,33 +94,13 @@ router.post('/notes', (req, res, next) => {
 
   const newNote = { title, content, tags, userId };
 
-  const valFolderIdProm = validateFolderId(userId, folderId);
-  const valTagIdsProm = validateTagIds(userId, tags);
-
-  Promise.all([valFolderIdProm, valTagIdsProm])
-    .then(() => Note.create(newNote))
+  Note.create(newNote)
     .then(result => {
       res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
-      if(err === 'InvalidFolder') {
-        err = new Error('The folder is not valid');
-        err.status = 400;
-      }
-      if(err === 'InvalidTag') {
-        err = new Error('The tag is not valid');
-        err.status = 400;
-      }
       next(err);
     });
-
-  // Note.create(newItem)
-  //   .then(result => {
-  //     res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
-  //   })
-  //   .catch(err => {
-  //     next(err);
-  //   });
 });
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
@@ -186,45 +140,18 @@ router.put('/notes/:id', (req, res, next) => {
   const updateNote = { title, content, tags, userId };
   const options = { new: true };
 
-  const valFolderIdProm = validateFolderId(userId, folderId);
-  const valTagIdsProm = validateTagIds(userId, tags);
-
-  Promise.all([valFolderIdProm, valTagIdsProm])
-  .then(() => {
-    return Note.findByIdAndUpdate(id, updateNote, options)
+  Note.findByIdAndUpdate(id, updateNote, options)
     .populate('tags')
-  })
-  .then(result => {
-    if(result) {
-      res.json(result);
-    } else {
-      next();
-    }
-  })
-  .catch(err => {
-    if(err === 'InvalidFolder') {
-      err = new Error('The folder is not valid');
-      err.status = 400;
-    }
-    if(err === 'InvalidTag') {
-      err = new Error('The tag is not valid');
-      err.status = 400;
-    }
-    next(err);
-  });
-
-  // Note.findByIdAndUpdate(id, updateItem, options)
-  //   .populate('tags')
-  //   .then(result => {
-  //     if (result) {
-  //       res.json(result);
-  //     } else {
-  //       next();
-  //     }
-  //   })
-  //   .catch(err => {
-  //     next(err);
-  //   });
+    .then(result => {
+      if (result) {
+        res.json(result);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
@@ -233,12 +160,8 @@ router.delete('/notes/:id', (req, res, next) => {
   const userId = req.user.id;
 
   Note.findOneAndRemove({ _id: id, userId })
-    .then(result => {
-      if (result) {
-        res.status(204).end();
-      } else {
-        next();
-      }
+    .then(() => {
+      res.status(204).end();
     })
     .catch(err => {
       next(err);
