@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
 const mongoose = require('mongoose');
 
@@ -10,7 +11,9 @@ const Note = require('../models/note');
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/folders', (req, res, next) => {
-  Folder.find()
+  const userId = req.user.id;
+  
+  Folder.find({userId})
     .sort('name')
     .then(results => {
       res.json(results);
@@ -23,6 +26,7 @@ router.get('/folders', (req, res, next) => {
 /* ========== GET/READ A SINGLE ITEM ========== */
 router.get('/folders/:id', (req, res, next) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
@@ -30,7 +34,7 @@ router.get('/folders/:id', (req, res, next) => {
     return next(err);
   }
 
-  Folder.findById(id)
+  Folder.findOne({ _id: id, userId })
     .then(result => {
       if (result) {
         res.json(result);
@@ -46,8 +50,9 @@ router.get('/folders/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/folders', (req, res, next) => {
   const { name } = req.body;
+  const userId = req.user.id;
 
-  const newFolder = { name };
+  const newFolder = { name, userId };
 
   /***** Never trust users - validate input *****/
   if (!name) {
