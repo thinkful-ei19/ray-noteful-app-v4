@@ -3,7 +3,6 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-
 const mongoose = require('mongoose');
 
 const Folder = require('../models/folder');
@@ -94,8 +93,9 @@ router.put('/folders/:id', (req, res, next) => {
   }
 
   const updateFolder = { name, userId };
+  const options = { new: true };
 
-  Folder.findByIdAndUpdate(id, updateFolder, { new: true })
+  Folder.findByIdAndUpdate(id, updateFolder, options)
     .then(result => {
       if (result) {
         res.json(result);
@@ -118,7 +118,7 @@ router.delete('/folders/:id', (req, res, next) => {
   const userId = req.user.id;
 
   // Manual "cascading" delete to ensure integrity
-  const folderRemovePromise = Folder.findByIdAndRemove({ _id: id, });  // NOTE **underscore** _id
+  const folderRemovePromise = Folder.findOneAndRemove({ _id: id, userId });  // NOTE **underscore** _id
   // const noteRemovePromise = Note.deleteMany({ folderId: id });
 
   const noteRemovePromise = Note.updateMany(
