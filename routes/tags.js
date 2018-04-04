@@ -79,6 +79,8 @@ router.put('/tags/:id', (req, res, next) => {
   const { name } = req.body;
   const userId = req.user.id;
 
+  const updateTag = { name, userId };
+
   /***** Never trust users - validate input *****/
   if (!name) {
     const err = new Error('Missing `name` in request body');
@@ -92,7 +94,6 @@ router.put('/tags/:id', (req, res, next) => {
     return next(err);
   }
 
-  const updateTag = { name, userId };
   const options = { new: true };
 
   Tag.findByIdAndUpdate(id, updateTag, options)

@@ -79,6 +79,8 @@ router.put('/folders/:id', (req, res, next) => {
   const { name } = req.body;
   const userId = req.user.id;
 
+  const updateFolder = { name, userId };
+
   /***** Never trust users - validate input *****/
   if (!name) {
     const err = new Error('Missing `name` in request body');
@@ -92,7 +94,6 @@ router.put('/folders/:id', (req, res, next) => {
     return next(err);
   }
 
-  const updateFolder = { name, userId };
   const options = { new: true };
 
   Folder.findByIdAndUpdate(id, updateFolder, options)

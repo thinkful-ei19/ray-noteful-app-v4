@@ -109,6 +109,8 @@ router.put('/notes/:id', (req, res, next) => {
   const { title, content, folderId, tags } = req.body;
   const userId = req.user.id;
 
+  const updateNote = { title, content, tags, userId };
+
   /***** Never trust users - validate input *****/
   if (!title) {
     const err = new Error('Missing `title` in request body');
@@ -123,7 +125,7 @@ router.put('/notes/:id', (req, res, next) => {
   }
 
   if (mongoose.Types.ObjectId.isValid(folderId)) {
-    updateItem.folderId = folderId;
+    updateNote.folderId = folderId;
   }
 
   if (tags) {
@@ -136,8 +138,6 @@ router.put('/notes/:id', (req, res, next) => {
     });
   }
 
-
-  const updateNote = { title, content, tags, userId };
   const options = { new: true };
 
   Note.findByIdAndUpdate(id, updateNote, options)
