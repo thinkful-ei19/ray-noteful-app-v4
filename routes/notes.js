@@ -9,6 +9,30 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
+function validateFolderId(userId, folderId) {
+  if(!folderId) {
+    return Promise.resolve();
+  }
+  return Folder.findOne({ _id: folderId, userId })
+    .then(result => {
+      if(!result) {
+        return Promise.reject('InvalidFolder');
+      }
+    });
+}
+
+function validateTagIds(userId, tags = []) {
+  if(!tags.length) {
+    return Promise.resolve();
+  }
+  return Tag.find( {$and: [{ _id: { $in: tags }, userId }] })
+    .then(results => {
+      if(tags.length !== results.length) {
+        return Promise.reject('InvalidTag');
+      }
+    });
+}
+
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/notes', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
@@ -93,8 +117,12 @@ router.post('/notes', (req, res, next) => {
   }
 
   const newNote = { title, content, tags, userId };
+  
+  const valFolderIdPromise = validateFolderId(userId, folderId);
+  const valTagIdPromise = validateTagIds(userId, tags);
 
-  Note.create(newNote)
+  Promise.all([valFolderIdPromise, valTagIdPromise])
+    .then(() => Note.create(newNote))
     .then(result => {
       res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
@@ -140,8 +168,14 @@ router.put('/notes/:id', (req, res, next) => {
 
   const options = { new: true };
 
-  Note.findByIdAndUpdate(id, updateNote, options)
-    .populate('tags')
+  const valFolderIdPromise = validateFolderId(userId, folderId);
+  const valTagIdPromise = validateTagIds(userId, tags);
+
+  Promise.all([valFolderIdPromise, valTagIdPromise])
+    .then(() => {
+      return Note.findByIdAndUpdate(id, updateNote, options)
+      .populate('tags')
+    })
     .then(result => {
       if (result) {
         res.json(result);
