@@ -127,6 +127,14 @@ router.post('/notes', (req, res, next) => {
       res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
+      if(err === 'InvalidFolder') {
+        err = new Error('The folder is not valid');
+        err.status = 400;
+      }
+      if(err === 'InvalidTag') {
+        err = new Error('The tag is not valid');
+        err.status = 400;
+      }
       next(err);
     });
 });
@@ -184,6 +192,14 @@ router.put('/notes/:id', (req, res, next) => {
       }
     })
     .catch(err => {
+      if(err === 'InvalidFolder') {
+        err = new Error('The folder is not valid');
+        err.status = 400;
+      }
+      if(err === 'InvalidTag') {
+        err = new Error('The tag is not valid');
+        err.status = 400;
+      }
       next(err);
     });
 });
