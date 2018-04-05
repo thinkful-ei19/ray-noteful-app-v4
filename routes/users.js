@@ -18,7 +18,7 @@ router.post('/users', (req,res,next) => {
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
-      message: 'Missing field',
+      message: `Missing '${missingField}' in request body`, 
       location: `${missingField}`
     });
     // const err = new Error(`Missing ${missingField} in request body`);
