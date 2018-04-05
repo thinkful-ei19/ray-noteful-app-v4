@@ -15,9 +15,15 @@ router.post('/users', (req,res,next) => {
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
   if (missingField) {
-    const err = new Error(`Missing '${missingField}' in request body`);
-    err.status = 422;
-    return next(err);
+    return res.status(422).json({
+      code: 422,
+      reason: 'ValidationError',
+      message: 'Missing field',
+      location: `${missingField}`
+    });
+    // const err = new Error(`Missing ${missingField} in request body`);
+    // err.status = 422;
+    // return next(err);
   }
 
   //Validate fields are type string
