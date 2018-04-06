@@ -1,5 +1,4 @@
 'use strict';
-
 const app = require('../server');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
@@ -15,7 +14,7 @@ const seedUsers = require('../db/seed/users');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe.only('Noteful API - Login', function() {
+describe('Noteful API - Login', function() {
   let token;
   const fullname = 'Example User';
   const username = 'exampleUser';
