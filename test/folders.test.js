@@ -16,7 +16,7 @@ const seedUsers = require('../db/seed/users');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe.only('Noteful API - Folders', function () {
+describe('Noteful API - Folders', function () {
   let token;
   let user;
 
