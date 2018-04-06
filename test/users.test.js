@@ -305,7 +305,7 @@ describe('Noteful API - Users', function () {
             const res = err.response;
             expect(res).to.has.status(400);
             expect(res.body.reason).to.equal('ValidationError');
-            expect(res.body.message).to.equal('Username already taken');
+            expect(res.body.message).to.equal('The username already exists');
             expect(res.body.location).to.equal('username');
           });
       });

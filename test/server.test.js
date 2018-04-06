@@ -2,10 +2,41 @@
 const app = require('../server');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+
+const { TEST_MONGODB_URI, JWT_SECRET } = require('../config');
+
+const User = require('../models/user');
+
+const seedUsers = require('../db/seed/users');
 
 const expect = chai.expect;
-
 chai.use(chaiHttp);
+
+describe('Noteful Server', function() {
+  let token;
+  let user;
+
+  before(function() {
+    return mongoose.connect(TEST_MONGODB_URI)
+      .then(() => mongoose.connection.db.dropDatabase());
+  });
+
+  beforeEach(function() {
+    return User.insertMany(seedUsers).then(results => {
+      user = results[0];
+      token = jwt.sign({ user }, JWT_SECRET, { subject: user.username });
+    });
+  });
+
+  afterEach(function () {
+    return mongoose.connection.db.dropDatabase();
+  });
+
+  after(function () {
+    return mongoose.disconnect();
+  });
 
 describe('Reality Check', () => {
 
@@ -48,6 +79,7 @@ describe('Basic Express setup', () => {
     it('should respond with 404 when given a bad path', () => {
       return chai.request(app)
         .get('/bad/path')
+        .set('Authorization', `Bearer ${token}`)
         .catch(err => err.response)
         .then(res => {
           expect(res).to.have.status(404);
@@ -55,4 +87,5 @@ describe('Basic Express setup', () => {
     });
 
   });
+});
 });

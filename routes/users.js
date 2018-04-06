@@ -108,8 +108,14 @@ router.post('/users', (req,res,next) => {
   })
   .catch(err => {
     if (err.code === 11000) {
-      err = new Error('The username already exists');
-      err.status = 400;
+      return res.status(400).json({
+        code: 400,
+        reason: 'ValidationError',
+        message: 'The username already exists',
+        location: 'username'
+      });
+      // err = new Error('The username already exists');
+      // err.status = 400;
     }
     next(err);
   });
