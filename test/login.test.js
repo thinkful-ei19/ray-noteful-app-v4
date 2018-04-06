@@ -27,14 +27,14 @@ describe.only('Noteful API - Login', function() {
   });
   
   beforeEach(function() {
-    return User.hashPassword(password)
-      .then(digest => {
-        User.create({
-          username,
-          password: digest,
-          fullname,
-      })
-    });
+    return User.insertMany(seedUsers);
+    // return User.hashPassword(password)
+    //   .then(digest => User.create({
+    //     username,
+    //     password: digest,
+    //     firstName,
+    //     lastName
+    //   }));
   });
 
   afterEach(function () {
@@ -49,12 +49,13 @@ describe.only('Noteful API - Login', function() {
 
   describe('/api/login', function() {
     it('Should return a valid auth token', function() {
+      const { _id: id, username, fullname } = seedUsers[0];
       return chai
         .request(app)
         .post('/api/login')
         .send({
           username,
-          password,
+          password: 'password'
         })
         .then(res => {
           expect(res).to.have.status(200);
@@ -62,11 +63,12 @@ describe.only('Noteful API - Login', function() {
           expect(res.body.authToken).to.be.a('string');
 
           const payload = jwt.verify(res.body.authToken, JWT_SECRET);
-          
+
           expect(payload.user).to.not.have.property('password');
-          expect(payload.user).to.have.keys('id', 'username', 'fullname');
-          expect(payload.user.username).to.deep.equal(username);
-          expect(payload.user.fullname).to.deep.equal(fullname);
+          expect(payload.user).to.deep.equal({ id, username, fullname });
+        //   expect(payload.user).to.have.keys('id', 'username', 'fullname');
+        //   expect(payload.user.username).to.deep.equal(username);
+        //   expect(payload.user.fullname).to.deep.equal(fullname);
         });
     });
 

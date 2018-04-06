@@ -4,14 +4,13 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const mongoose = require('mongoose');
 
-const { TEST_MONGODB_URI } = require('../config');
+const { TEST_MONGODB_URI, JWT_SECRET } = require('../config');
 
 const Folder = require('../models/folder');
 const seedFolders = require('../db/seed/folders');
-
+const seedUsers = require('../db/seed/users');
 
 const expect = chai.expect;
-
 chai.use(chaiHttp);
 
 describe('Noteful API - Folders', function () {
