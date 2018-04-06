@@ -14,7 +14,7 @@ const seedFolders = require('../db/seed/folders');
 const seedUsers = require('../db/seed/users');
 
 const expect = chai.expect;
-chai.use(chaiHttp);
+chai.use(chaiHttp); 
 
 describe('Noteful API - Folders', function () {
   let token;
